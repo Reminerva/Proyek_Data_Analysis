@@ -324,12 +324,12 @@ with st.sidebar:
 
 ### Filter diterapkan
 df_order_update = df_order[(df_order["order_purchase_timestamp"] >= str(start_date)) &
-                           (df_order["order_purchase_timestamp"] <= str(end_date))]\
+                           (df_order["order_purchase_timestamp"] <= str(end_date))]
                            
 df_order_items_update = df_order_items[(df_order_items["shipping_limit_date"] >= str(start_date)) &
                                        (df_order_items["shipping_limit_date"] <= str(end_date))]
 
-### Data yang telah difilter diterapkan
+### Data yang telah difilter diterapkan untuk membuat beberapa data frame
 pivot_seller, pivot_order = create_pivot_seller_and_order(df_order_items_update,
                                                           df_product,
                                                           df_order_payments,
@@ -349,5 +349,62 @@ df_customer_city_merged = create_df_customer_city_merged(df_customer_merged)
 
 pembelian_kategoribarang_di_kota = return_kategori_di_kota_jual(df_customer_city_merged)
 
+## DEPLOYMENT
+st.title('Proyek Data Analisis :sparkles:')
+# st.header('Proyek Data Analisis :sparkles:')
+st.caption('Created by: Reksa Alamsyah')
 
-print(pembelian_kategoribarang_di_kota)
+st.write(
+    """
+    Data mentah didapatkan dari: 
+    
+    https://drive.google.com/file/d/1MsAjPM7oKtVfJL_wRp1qmCajtSG1mdcK/view
+    
+    Data yang disajikan telah melalui tahapan-tahapan data cleaning sehingga siap untuk dianalisis
+    """
+)
+
+
+col1, col2 = st.columns(2)
+
+with col1:
+
+    fig, ax = plt.subplots(nrows=2, ncols=1, figsize=(15, 15))
+
+    df_0 = df_customer_merged.groupby(by='customer_state').agg({
+                                                        'payment_value_sum': 'sum'
+                                                        }).sort_values(by = ('payment_value_sum'), ascending = False).head(8)
+    df_0 = df_0.sort_values(by = ('payment_value_sum'), ascending = True)
+    
+    colors = ["#90CAF9", "#D3D3D3", "#D3D3D3", "#D3D3D3", "#D3D3D3"]
+
+    sns.barplot(y=df_0.index,
+                x=df_0['payment_value_sum'],
+                data=df_0,
+                palette=colors,
+                ax=ax[0]
+                )
+    ax[0].set_xlabel("Total Pengeluaran (Juta BRL)", fontsize=15)
+    ax[0].set_ylabel("Nama State", fontsize=15)
+    ax[0].set_title("Top 8 Total Pengeluaran Seluruh Customer di Setiap State", fontsize=24)
+
+    df_0 = df_customer_merged.groupby(by='customer_city').agg({
+                                                        'payment_value_sum': 'sum'
+                                                        }).sort_values(by = ('payment_value_sum'), ascending = False).head(8)
+    df_0 = df_0.sort_values(by = ('payment_value_sum'), ascending = True)
+    
+    sns.barplot(y=df_0.index,
+                x=df_0['payment_value_sum'],
+                data=df_0,
+                palette=colors,
+                ax=ax[1]
+                )    
+    
+    ax[1].set_xlabel("Total Pengeluaran (Juta BRL)", fontsize=15)
+    ax[1].set_ylabel("Nama City", fontsize=15)
+    ax[1].set_title("Top 8 Total Pengeluaran Seluruh Customer di Setiap City", fontsize=24)
+    
+    st.pyplot(fig)
+
+with col2:
+    st.header("Customer pengeluaran terbesar")

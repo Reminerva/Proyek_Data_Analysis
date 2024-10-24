@@ -190,13 +190,13 @@ def create_df_customer_city_merged(df_customer_merged: pd.DataFrame) -> pd.DataF
         df_customer_merged (pandas DataFrame): Data Frame df_customer_merged
 
     Returns:
-        df_customer_city_merged: Data Frame df_customer_city_merged
+        df_customer_city_merged (pandas DataFrame): Data Frame df_customer_city_merged
     """    
 
-    df_customer_city_merged = df_customer_merged.groupby(by='seller_city').agg({
-                                                    'payment_value_sum': 'sum',
-                                                    'product_category_name_<lambda>': 'sum'
-                                                    }).sort_values(by = ('payment_value_sum'), ascending = False).head(8)
+    df_customer_city_merged = df_customer_merged.groupby(by='customer_city').agg({
+                                                        'payment_value_sum': 'sum',
+                                                        'product_category_name_<lambda>': 'sum'
+                                                        }).sort_values(by = ('payment_value_sum'), ascending = False).head(8)
     
     return df_customer_city_merged
 
@@ -226,15 +226,128 @@ def return_kategori_di_kota_beli(df_customer_city_merged: pd.DataFrame) -> list:
 
     return pemberlian_kategoribarang_di_kota
 
-pivot_seller, pivot_order = create_pivot_seller_and_order(df_order_items, 
-                                                             df_product, 
-                                                             df_order_payments, 
-                                                             df_order)
-df_sellers_merged, df_customer_merged = create_df_sellers_and_customer_merged(pivot_seller, 
-                                                                              df_sellers, 
-                                                                              pivot_order, 
-                                                                              df_order, 
+### Membuat Klaster customer
+def create_klaster_customer(df_customer_merged: pd.DataFrame) -> pd.DataFrame:
+
+    """
+    Fungsi ini digunakan untuk menghasilkan klaster customer
+
+    Parameters:
+        df_customer_merged (pandas Data Frames): Data Frame df_customer_merged
+    
+    Returns:
+        df_customer_klaster (pandas DataFrame): Data Frame df_customer_klaster
+    """
+
+    batas_atas_klaster_I = 70
+    batas_atas_klaster_II = 130
+    batas_atas_klaster_III = 210
+    batas_atas_klaster_IV = 350
+    batas_atas_klaster_V = 1000
+    batas_atas_klaster_VI = 4000
+
+    batasan_klaster = [0,
+                       batas_atas_klaster_I,
+                       batas_atas_klaster_II,
+                       batas_atas_klaster_III,
+                       batas_atas_klaster_IV,
+                       batas_atas_klaster_V,
+                       batas_atas_klaster_VI,
+                       float('inf')
+                       ]
+    kumpulan_klaster = ['Klaster I','Klaster II','Klaster III','Klaster IV','Klaster V','Klaster VI','Klaster VII']
+
+    df_customer_merged['Klaster'] = pd.cut(df_customer_merged['payment_value_sum'],
+                                           bins=batasan_klaster,
+                                           labels=kumpulan_klaster,
+                                           include_lowest=True)
+    df_customer_klaster = df_customer_merged[['customer_id','payment_value_sum','Klaster']]
+
+    return df_customer_klaster
+
+### Membuat Klaster seller
+def create_klaster_sellers(df_sellers_merged: pd.DataFrame) -> pd.DataFrame:
+
+    """
+    Fungsi ini digunakan untuk menghasilkan klaster seller
+
+    Parameters:
+        df_sellers_merged (pandas Data Frames): Data Frame df_sellers_merged
+    
+    Returns:
+        df_sellers_klaster (pandas DataFrame): Data Frame df_sellers_klaster
+    """
+
+    batas_atas_klaster_I = 300
+    batas_atas_klaster_II = 1000
+    batas_atas_klaster_III = 2500
+    batas_atas_klaster_IV = 5000
+    batas_atas_klaster_V = 10000
+    batas_atas_klaster_VI = 50000
+
+    batasan_klaster = [0,
+                       batas_atas_klaster_I,
+                       batas_atas_klaster_II,
+                       batas_atas_klaster_III,
+                       batas_atas_klaster_IV,
+                       batas_atas_klaster_V,
+                       batas_atas_klaster_VI,
+                       float('inf')
+                       ]
+    
+    kumpulan_klaster = ['Klaster I','Klaster II','Klaster III','Klaster IV','Klaster V','Klaster VI','Klaster VII']
+
+    df_sellers_merged['Klaster'] = pd.cut(df_sellers_merged['price_sum'],
+                                          bins=batasan_klaster,
+                                          labels=kumpulan_klaster,
+                                          include_lowest=True)
+    
+    df_sellers_klaster = df_sellers_merged[['seller_id','price_sum','Klaster']]
+
+    return df_sellers_klaster
+
+## MEMBUAT FILTER
+min_date = df_order["order_purchase_timestamp"].min()
+max_date = df_order["order_purchase_timestamp"].max()
+
+with st.sidebar:
+    # Menambahkan logo perusahaan
+    st.image("https://github.com/dicodingacademy/assets/raw/main/logo.png")
+
+    # Mengambil start_date & end_date dari date_input
+    start_date, end_date = st.date_input(
+        label='Rentang Waktu',
+        min_value=min_date,
+        max_value=max_date,
+        value=[min_date, max_date]
+    )
+
+### Filter diterapkan
+df_order_update = df_order[(df_order["order_purchase_timestamp"] >= str(start_date)) &
+                           (df_order["order_purchase_timestamp"] <= str(end_date))]\
+                           
+df_order_items_update = df_order_items[(df_order_items["shipping_limit_date"] >= str(start_date)) &
+                                       (df_order_items["shipping_limit_date"] <= str(end_date))]
+
+### Data yang telah difilter diterapkan
+pivot_seller, pivot_order = create_pivot_seller_and_order(df_order_items_update,
+                                                          df_product,
+                                                          df_order_payments,
+                                                          df_order_update)
+
+df_sellers_merged, df_customer_merged = create_df_sellers_and_customer_merged(pivot_seller,
+                                                                              df_sellers,
+                                                                              pivot_order,
+                                                                              df_order_update,
                                                                               df_customer)
+
 df_sellers_city_merged = create_df_sellers_city_merged(df_sellers_merged)
+
 penjualan_kategoribarang_di_kota = return_kategori_di_kota_jual(df_sellers_city_merged)
-print(penjualan_kategoribarang_di_kota)
+
+df_customer_city_merged = create_df_customer_city_merged(df_customer_merged)
+
+pembelian_kategoribarang_di_kota = return_kategori_di_kota_jual(df_customer_city_merged)
+
+
+print(pembelian_kategoribarang_di_kota)

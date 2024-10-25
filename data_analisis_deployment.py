@@ -569,6 +569,8 @@ with col1:
     ax[0].tick_params(axis='y', labelsize=20)
     ax[0].tick_params(axis='x', labelsize=20)
 
+    st.subheader('DEVITA I LOVE YOUUU')
+
     st.pyplot(plt)
 
 

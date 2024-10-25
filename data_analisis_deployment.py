@@ -360,23 +360,28 @@ st.write(
     
     https://drive.google.com/file/d/1MsAjPM7oKtVfJL_wRp1qmCajtSG1mdcK/view
     
-    Data yang disajikan telah melalui tahapan-tahapan data cleaning sehingga siap untuk dianalisis
+    Data yang disajikan telah melalui tahapan-tahapan data cleaning sehingga siap untuk dianalisis.\
+    Analisis dilakukan terlebih dahulu pada Google Colab dengan tujuan menjawab 8 pertanyaan utama.
+    Google Colab tersebut dapat diakses pada link sebagai berikut:
+
+    https://colab.research.google.com/drive/1nEoGv81s4V6xQXyWLrH9mi97WQuH8pmz?usp=sharing
     """
 )
 
 
 col1, col2 = st.columns(2)
 
+#### Pertanyaan 1
 with col1:
 
-    fig, ax = plt.subplots(nrows=2, ncols=1, figsize=(15, 15))
+    fig, ax = plt.subplots(nrows=3, ncols=1, figsize=(12,20))
 
     df_0 = df_customer_merged.groupby(by='customer_state').agg({
                                                         'payment_value_sum': 'sum'
-                                                        }).sort_values(by = ('payment_value_sum'), ascending = False).head(8)
-    df_0 = df_0.sort_values(by = ('payment_value_sum'), ascending = True)
+                                                        }).sort_values(by = ('payment_value_sum'), ascending = False).head(5)
+    df_0 = df_0.sort_values(by = ('payment_value_sum'), ascending = False)
     
-    colors = ["#90CAF9", "#D3D3D3", "#D3D3D3", "#D3D3D3", "#D3D3D3"]
+    colors = ["#90CAF9", "#D3D3D3","#D3D3D3", "#D3D3D3", "#D3D3D3"]
 
     sns.barplot(y=df_0.index,
                 x=df_0['payment_value_sum'],
@@ -384,14 +389,16 @@ with col1:
                 palette=colors,
                 ax=ax[0]
                 )
-    ax[0].set_xlabel("Total Pengeluaran (Juta BRL)", fontsize=15)
-    ax[0].set_ylabel("Nama State", fontsize=15)
-    ax[0].set_title("Top 8 Total Pengeluaran Seluruh Customer di Setiap State", fontsize=24)
+    ax[0].set_xlabel("Total Pengeluaran (Juta BRL)", fontsize=24)
+    ax[0].set_ylabel("Nama State", fontsize=24)
+    ax[0].set_title("Top 5 Total Pengeluaran Seluruh Customer di Setiap State", fontsize=28)
+    ax[0].tick_params(axis='y', labelsize=20)
+    ax[0].tick_params(axis='x', labelsize=20)
 
     df_0 = df_customer_merged.groupby(by='customer_city').agg({
                                                         'payment_value_sum': 'sum'
-                                                        }).sort_values(by = ('payment_value_sum'), ascending = False).head(8)
-    df_0 = df_0.sort_values(by = ('payment_value_sum'), ascending = True)
+                                                        }).sort_values(by = ('payment_value_sum'), ascending = False).head(5)
+    df_0 = df_0.sort_values(by = ('payment_value_sum'), ascending = False)
     
     sns.barplot(y=df_0.index,
                 x=df_0['payment_value_sum'],
@@ -400,11 +407,168 @@ with col1:
                 ax=ax[1]
                 )    
     
-    ax[1].set_xlabel("Total Pengeluaran (Juta BRL)", fontsize=15)
-    ax[1].set_ylabel("Nama City", fontsize=15)
-    ax[1].set_title("Top 8 Total Pengeluaran Seluruh Customer di Setiap City", fontsize=24)
+    ax[1].set_xlabel("Total Pengeluaran (Juta BRL)", fontsize=24)
+    ax[1].set_ylabel("Nama City", fontsize=24)
+    ax[1].set_title("Top 5 Total Pengeluaran Seluruh Customer di Setiap City", fontsize=28)
+    ax[1].tick_params(axis='y', labelsize=20)
+    ax[1].tick_params(axis='x', labelsize=20)
     
+    df_0 = df_customer_merged.groupby(by='customer_id').agg({
+                                                        'payment_value_sum': 'sum'
+                                                        }).sort_values(by = ('payment_value_sum'), ascending = False).head(5)
+    df_0 = df_0.sort_values(by = ('payment_value_sum'), ascending = False)
+    
+    index_ = [i[:3]+'...' for i in df_0.index]
+
+    sns.barplot(y=index_,
+                x=df_0['payment_value_sum'],
+                data=df_0,
+                palette=colors,
+                ax=ax[2]
+                )   
+
+    ax[2].set_xlabel("Total Pengeluaran (BRL)", fontsize=24)
+    ax[2].set_ylabel("ID Customer", fontsize=24)
+    ax[2].set_title("Top 5 Total Pengeluaran Customer", fontsize=28)
+    ax[2].tick_params(axis='y', labelsize=20)
+    ax[2].tick_params(axis='x', labelsize=20)
+
+    plt.tight_layout()
+
     st.pyplot(fig)
 
+#### Pertanyaan 2
 with col2:
-    st.header("Customer pengeluaran terbesar")
+
+    fig, ax = plt.subplots(nrows=3, ncols=1, figsize=(12,20))
+
+    df_0 = df_sellers_merged.groupby(by='seller_state').agg({
+                                                        'price_sum': 'sum'
+                                                        }).sort_values(by = ('price_sum'), ascending = False).head(5)
+    df_0 = df_0.sort_values(by = ('price_sum'), ascending = False)
+    
+    colors = ["#90CAF9", "#D3D3D3", "#D3D3D3", "#D3D3D3", "#D3D3D3"]
+
+    sns.barplot(y=df_0.index,
+                x=df_0['price_sum'],
+                data=df_0,
+                palette=colors,
+                ax=ax[0]
+                )
+                
+    ax[0].set_xlabel("Total Penghasilan (Juta BRL)", fontsize=24)
+    ax[0].set_ylabel("Nama State", fontsize=24)
+    ax[0].set_title("Top 5 Total Penghasilan Seluruh Seller di Setiap State", fontsize=28)
+    ax[0].tick_params(axis='y', labelsize=20)
+    ax[0].tick_params(axis='x', labelsize=20)
+
+    df_0 = df_sellers_merged.groupby(by='seller_city').agg({
+                                                        'price_sum': 'sum'
+                                                        }).sort_values(by = ('price_sum'), ascending = False).head(5)
+    df_0 = df_0.sort_values(by = ('price_sum'), ascending = False)
+    
+    sns.barplot(y=df_0.index,
+                x=df_0['price_sum'],
+                data=df_0,
+                palette=colors,
+                ax=ax[1]
+                )    
+    
+    ax[1].set_xlabel("Total Penghasilan (Juta BRL)", fontsize=24)
+    ax[1].set_ylabel("Nama City", fontsize=24)
+    ax[1].set_title("Top 5 Total Penghasilan Seluruh Seller di Setiap City", fontsize=28)
+    ax[1].tick_params(axis='y', labelsize=20)
+    ax[1].tick_params(axis='x', labelsize=20)
+    
+    df_0 = df_sellers_merged.groupby(by='seller_id').agg({
+                                                        'price_sum': 'sum'
+                                                        }).sort_values(by = ('price_sum'), ascending = False).head(5)
+    df_0 = df_0.sort_values(by = ('price_sum'), ascending = False)
+    
+    index_ = [i[:3]+'...' for i in df_0.index]
+
+    sns.barplot(y=index_,
+                x=df_0['price_sum'],
+                data=df_0,
+                palette=colors,
+                ax=ax[2]
+                )   
+
+    ax[2].set_xlabel("Total Penghasilan (BRL)", fontsize=24)
+    ax[2].set_ylabel("ID Seller", fontsize=24)
+    ax[2].set_title("Top 5 Total Penghasilan Seller", fontsize=28)
+    ax[2].tick_params(axis='y', labelsize=20)
+    ax[2].tick_params(axis='x', labelsize=20)
+
+    plt.tight_layout()
+
+    st.pyplot(fig)
+
+#### Pertanyaan 3
+a=1
+if a==1:
+    # Membuat kanvas
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))  # 1 baris, 2 kolom
+    colors = ["#D3D3D3", "#D3D3D3", "#D3D3D3", "#D3D3D3", "#90CAF9"]
+
+    # Grafik pertama
+    df_0 = df_customer_merged.groupby(by='customer_city').agg({
+                                                            'payment_value_sum': 'sum'
+                                                            }).sort_values(by = ('payment_value_sum'), ascending = False).head(5)
+    df_0 = df_0.sort_values(by = ('payment_value_sum'), ascending = True)
+    ax1.barh(y=df_0.index,
+            width=df_0['payment_value_sum'],
+            align='center',
+            color=colors
+            )
+    ax1.set_xlabel("Total Pengeluaran (Juta BRL)")
+    ax1.set_title("Top 5 Total Pengeluaran Seluruh Customer di Setiap City")
+
+    # Grafik kedua
+    df_0 = df_sellers_merged.groupby(by='seller_city').agg({
+                                                            'price_sum': 'sum'
+                                                            }).sort_values(by = ('price_sum'), ascending = False).head(5)
+    df_0 = df_0.sort_values(by = ('price_sum'), ascending = True)
+    ax2.barh(y=df_0.index,
+            width=df_0['price_sum'],
+            align='center',
+            color=colors
+            )
+    ax2.set_xlabel("Total Pendapatan (Juta BRL)")
+    ax2.set_title("Top 5 Total Pendapatan Seluruh Seller di Setiap City")
+
+    # Tampilkan grafik
+    plt.tight_layout()  # Agar layout lebih rapi
+    st.pyplot(plt)
+
+else:
+    pass
+
+### Pertanyaan 4
+col1, col2 = st.columns(2)
+st.subheader('a')
+with col1:
+
+    st.subheader('a')
+
+    fig, ax = plt.subplots(nrows=3, ncols=1, figsize=(12,20))    
+
+    colors = ["#90CAF9", "#D3D3D3", "#D3D3D3", "#D3D3D3", "#D3D3D3"]
+
+    penjualan_kategoribarang_di_kota[0][1] = penjualan_kategoribarang_di_kota[0][1].reset_index().sort_values(by = ('count'), ascending = True)
+    sns.barplot(y=penjualan_kategoribarang_di_kota[0][1]['product_category_name_<lambda>'],
+                                                        x=penjualan_kategoribarang_di_kota[0][1]['count'],
+                                                        data=penjualan_kategoribarang_di_kota[0][1],
+                                                        palette=colors,
+                                                        ax=ax[0]
+                                                        )
+
+    ax[0].set_xlabel("Total Penjualan Barang (Satuan)", fontsize=24)
+    ax[0].set_ylabel("Kategori Barang", fontsize=24)
+    ax[0].set_title("Top 10 Penjualan Kategori Barang di", fontsize=28)
+    ax[0].tick_params(axis='y', labelsize=20)
+    ax[0].tick_params(axis='x', labelsize=20)
+
+    st.pyplot(plt)
+
+

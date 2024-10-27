@@ -428,7 +428,7 @@ with col1:
     
     ax[1].set_xlabel("Total Pengeluaran (Juta BRL)", fontsize=24)
     ax[1].set_ylabel("Nama City", fontsize=24)
-    ax[1].set_title("Top 5 Total Pengeluaran Seluruh Customer di Setiap City", fontsize=28)
+    ax[1].set_title("Top 5 Total Pengeluaran Seluruh Customer di Setiap Kota", fontsize=28)
     ax[1].tick_params(axis='y', labelsize=20)
     ax[1].tick_params(axis='x', labelsize=20)
     
@@ -495,7 +495,7 @@ with col2:
     
     ax[1].set_xlabel("Total Penghasilan (Juta BRL)", fontsize=24)
     ax[1].set_ylabel("Nama City", fontsize=24)
-    ax[1].set_title("Top 5 Total Penghasilan Seluruh Seller di Setiap City", fontsize=28)
+    ax[1].set_title("Top 5 Total Penghasilan Seluruh Seller di Setiap Kota", fontsize=28)
     ax[1].tick_params(axis='y', labelsize=20)
     ax[1].tick_params(axis='x', labelsize=20)
     
@@ -531,11 +531,11 @@ if str(start_date)[:10]==str(min_date)[:10] and str(end_date)[:10]==str(max_date
         1. Kota dengan pengeluaran yang tinggi bukan berarti kota tersebut memiliki penghasilan yang relatif tinggi juga, begitupun sebaliknya. 
         Artinya, banyak terjadi kasus dimana customer membeli barang ke seller di kota yang berbeda dari customer tersebut.
         2. Contohnya diperingkat ke 2 pada kota dengan pengeluaran terbesar adalah 
-        rio de janeiro yang memiliki pengeluaran sebesar 1.133.999 namun memiliki penghasilan kurang dari setengahnya yaitu 340.725.
-        3. Menimbang hal tersebut (poin 2), di City rio de janeiro masih memiliki peluang untuk seller karena 
+        Rio De Janeiro yang memiliki pengeluaran sebesar 1.133.999 namun memiliki penghasilan kurang dari setengahnya yaitu 340.725.
+        3. Menimbang hal tersebut (poin 2), di kota Rio De Janeiro masih memiliki peluang untuk seller karena 
         kota tersebut memiliki daya konsumsi yang kuat namun daya konsumsi tersebut disalurkan pada kota lain. 
         Dari sini muncul pertanyaan berikutnya yaitu, apa yang harus dijual? Untuk menjawab pertanyaan ini diperlukan
-        analisis performa kategori barang di setiap kota (khusus nya rio de janeiro) 
+        analisis performa kategori barang di setiap kota (khususnya Rio De Janeiro) 
         untuk mengetahui apa saja kategori barang yang banyak dibeli oleh customer
         namun hanya sedikit dijual oleh seller di kota tersebut.
         """
@@ -555,7 +555,7 @@ if str(start_date)[:10]==str(min_date)[:10] and str(end_date)[:10]==str(max_date
             color=colors
             )
     ax1.set_xlabel("Total Pengeluaran (Juta BRL)")
-    ax1.set_title("Top 5 Total Pengeluaran Seluruh Customer di Setiap City")
+    ax1.set_title("Top 5 Total Pengeluaran Seluruh Customer di Setiap Kota")
 
     # Grafik kedua
     df_0 = df_sellers_merged.groupby(by='seller_city').agg({
@@ -568,7 +568,7 @@ if str(start_date)[:10]==str(min_date)[:10] and str(end_date)[:10]==str(max_date
             color=colors
             )
     ax2.set_xlabel("Total Pendapatan (Juta BRL)")
-    ax2.set_title("Top 5 Total Pendapatan Seluruh Seller di Setiap City")
+    ax2.set_title("Top 5 Total Pendapatan Seluruh Seller di Setiap Kota")
 
     # Tampilkan grafik
     plt.tight_layout()  # Agar layout lebih rapi

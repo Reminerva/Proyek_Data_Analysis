@@ -322,8 +322,9 @@ min_date = df_order["order_purchase_timestamp"].min()
 max_date = df_order["order_purchase_timestamp"].max()
 
 with st.sidebar:
+    st.title('Proyek Data Analisis')
     # Menambahkan logo perusahaan
-    st.image("https://github.com/dicodingacademy/assets/raw/main/logo.png")
+    st.image("https://learn.g2.com/hubfs/Imported%20sitepage%20images/1ZB5giUShe0gw9a6L69qAgsd7wKTQ60ZRoJC5Xq3BIXS517sL6i6mnkAN9khqnaIGzE6FASAusRr7w=w1439-h786.png")
 
     # Mengambil start_date & end_date dari date_input
     start_date, end_date = st.date_input(
@@ -332,6 +333,7 @@ with st.sidebar:
         max_value=max_date,
         value=[min_date, max_date]
     )
+
 
 ### Filter diterapkan
 df_order_update = df_order[(df_order["order_purchase_timestamp"] >= str(start_date)) &
@@ -371,15 +373,17 @@ st.caption('Created by: Reksa Alamsyah')
 
 st.write(
     """
-    Data mentah didapatkan dari: 
+    Proyek ini merupakan proyek analisis terhadap data E-Commerce yang didapatkan dari:
     
     https://drive.google.com/file/d/1MsAjPM7oKtVfJL_wRp1qmCajtSG1mdcK/view
     
-    Data yang disajikan telah melalui tahapan-tahapan data cleaning sehingga siap untuk dianalisis.\
-    Analisis dilakukan terlebih dahulu pada Google Colab dengan tujuan menjawab 8 pertanyaan utama.
+    Data yang disajikan disini telah melalui tahapan-tahapan data cleaning sehingga siap untuk dianalisis.
+    Data Cleaning dan Analisis dilakukan terlebih dahulu pada Google Colab dengan tujuan menjawab 8 pertanyaan utama.
     Google Colab tersebut dapat diakses pada link sebagai berikut:
 
     https://colab.research.google.com/drive/1nEoGv81s4V6xQXyWLrH9mi97WQuH8pmz?usp=sharing
+    
+    Analisis dimulai dengan mendapatkan performa seller dan customer di suatu kota dan state.
     """
 )
 
@@ -396,7 +400,7 @@ with col1:
                                                         }).sort_values(by = ('payment_value_sum'), ascending = False).head(5)
     df_0 = df_0.sort_values(by = ('payment_value_sum'), ascending = False)
     
-    colors = ["#90CAF9", "#D3D3D3","#D3D3D3", "#D3D3D3", "#D3D3D3"]
+    colors = ["#8F4700", "#D3D3D3","#D3D3D3", "#D3D3D3", "#D3D3D3"]
 
     sns.barplot(y=df_0.index,
                 x=df_0['payment_value_sum'],
@@ -462,7 +466,7 @@ with col2:
                                                         }).sort_values(by = ('price_sum'), ascending = False).head(5)
     df_0 = df_0.sort_values(by = ('price_sum'), ascending = False)
     
-    colors = ["#90CAF9", "#D3D3D3", "#D3D3D3", "#D3D3D3", "#D3D3D3"]
+    colors = ["#8F4700", "#D3D3D3", "#D3D3D3", "#D3D3D3", "#D3D3D3"]
 
     sns.barplot(y=df_0.index,
                 x=df_0['price_sum'],
@@ -520,11 +524,25 @@ with col2:
     st.pyplot(fig)
 
 #### Pertanyaan 3
-a=1
-if a==1:
+if str(start_date)[:10]==str(min_date)[:10] and str(end_date)[:10]==str(max_date)[:10]:
+    st.write(
+        """
+        Jika dlihat dari pengeluaran dan penghasilan setiap kota, maka dapat diperoleh insight menarik sebagai berikut:
+        1. Kota dengan pengeluaran yang tinggi bukan berarti kota tersebut memiliki penghasilan yang relatif tinggi juga, begitupun sebaliknya. 
+        Artinya, banyak terjadi kasus dimana customer membeli barang ke seller di kota yang berbeda dari customer tersebut.
+        2. Contohnya diperingkat ke 2 pada kota dengan pengeluaran terbesar adalah 
+        rio de janeiro yang memiliki pengeluaran sebesar 1.133.999 namun memiliki penghasilan kurang dari setengahnya yaitu 340.725.
+        3. Menimbang hal tersebut (poin 2), di City rio de janeiro masih memiliki peluang untuk seller karena 
+        kota tersebut memiliki daya konsumsi yang kuat namun daya konsumsi tersebut disalurkan pada kota lain. 
+        Dari sini muncul pertanyaan berikutnya yaitu, apa yang harus dijual? Untuk menjawab pertanyaan ini diperlukan
+        analisis performa kategori barang di setiap kota (khusus nya rio de janeiro) 
+        untuk mengetahui apa saja kategori barang yang banyak dibeli oleh customer
+        namun hanya sedikit dijual oleh seller di kota tersebut.
+        """
+    )
     # Membuat kanvas
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 5))  # 1 baris, 2 kolom
-    colors = ["#D3D3D3", "#D3D3D3", "#D3D3D3", "#D3D3D3", "#90CAF9"]
+    colors = ["#D3D3D3", "#D3D3D3", "#D3D3D3", "#D3D3D3", "#8F4700"]
 
     # Grafik pertama
     df_0 = df_customer_merged.groupby(by='customer_city').agg({
@@ -560,68 +578,100 @@ else:
     pass
 
 ### Pertanyaan 4
-col1, col2 = st.columns(2)
 
-input_kota = 3 # 1-8
-input_barang = 4 # 1-10
+st.write(
+    """
+    Analisis berikutnya merupakan analisis perfroma kategori barang di setiap kota.
+    Tabel-tabel berikut disusun berdasarkan kota dengan pengeluaran atau penghasilan terbanyak.
+    
+    """
+)
 
-with col1:
+input_kota = st.selectbox(
+    label="Berapa kota yang ditampilkan?",
+    options=(2, 3, 4, 5, 6, 7, 8),
+    index=2
+)
 
-    fig, ax = plt.subplots(nrows=input_kota, ncols=1, figsize=(12,20))    
+input_barang = st.selectbox(
+    label="Berapa kategori barang yang ditampilkan?",
+    options=(2, 3, 4, 5, 6, 7, 8, 9, 10),
+    index=8
+)
 
-    colors = ["#90CAF9", "#D3D3D3", "#D3D3D3", "#D3D3D3", "#D3D3D3",
-              "#D3D3D3", "#D3D3D3", "#D3D3D3", "#D3D3D3", "#D3D3D3"]
+figsize_y = 100/(8*10)
 
-    for i in range (input_kota):
+fig, ax = plt.subplots(nrows=input_kota, ncols=2, figsize=(25,figsize_y*(input_kota*input_barang)))    
+
+colors = ["#8F4700", "#D3D3D3", "#D3D3D3", "#D3D3D3", "#D3D3D3",
+          "#D3D3D3", "#D3D3D3", "#D3D3D3", "#D3D3D3", "#D3D3D3"]
+
+for i in range (input_kota):
         
-        penjualan_kategoribarang_di_kota[i][1] = penjualan_kategoribarang_di_kota[i][1].reset_index().sort_values(by = ('count'), ascending = False)
-        penjualan_kategoribarang_di_kota[i][1] = penjualan_kategoribarang_di_kota[i][1].head(input_barang)
-        sns.barplot(y=penjualan_kategoribarang_di_kota[i][1]['product_category_name_<lambda>'],
-                                                            x=penjualan_kategoribarang_di_kota[i][1]['count'],
-                                                            data=penjualan_kategoribarang_di_kota[i][1],
-                                                            palette=colors,
-                                                            ax=ax[i]
-                                                            )
+    penjualan_kategoribarang_di_kota[i][1] = penjualan_kategoribarang_di_kota[i][1].reset_index().sort_values(by = ('count'), ascending = False)
+    penjualan_kategoribarang_di_kota[i][1] = penjualan_kategoribarang_di_kota[i][1].head(input_barang)
+    
+    penjualan_kategoribarang_di_kota[i][1]['product_category_name_<lambda>'] = [i[:12]+'...' for i in penjualan_kategoribarang_di_kota[i][1]['product_category_name_<lambda>']]
+    
+    sns.barplot(y=penjualan_kategoribarang_di_kota[i][1]['product_category_name_<lambda>'],
+                x=penjualan_kategoribarang_di_kota[i][1]['count'],
+                data=penjualan_kategoribarang_di_kota[i][1],
+                palette=colors,
+                ax=ax[i][0]
+                )
                                       
-        ax[i].set_xlabel("Total Penjualan Barang (Satuan)", fontsize=24)
-        ax[i].set_ylabel("Kategori Barang", fontsize=24)
-        ax[i].set_title("Top 10 Penjualan Kategori Barang di"+ " " + penjualan_kategoribarang_di_kota[i][0], fontsize=28)
-        ax[i].tick_params(axis='y', labelsize=20)
-        ax[i].tick_params(axis='x', labelsize=20)
-
-    plt.tight_layout()                                                                                                                                 
-    st.pyplot(fig)
-
-with col2:
-
-    fig, ax = plt.subplots(nrows=input_kota, ncols=1, figsize=(12,20))
-
-    colors = ["#90CAF9", "#D3D3D3", "#D3D3D3", "#D3D3D3", "#D3D3D3",
-              "#D3D3D3", "#D3D3D3", "#D3D3D3", "#D3D3D3", "#D3D3D3"]
-
-    for i in range (input_kota):
+    ax[i][0].set_xlabel("Total Penjualan Barang (Satuan)", fontsize=24)
+    ax[i][0].set_ylabel("Kategori Barang", fontsize=24)
+    ax[i][0].set_title("Top 10 Penjualan Kategori Barang di"+ " " + penjualan_kategoribarang_di_kota[i][0], fontsize=28)
+    ax[i][0].tick_params(axis='y', labelsize=20)
+    ax[i][0].tick_params(axis='x', labelsize=20)
         
-        pembelian_kategoribarang_di_kota[i][1] = pembelian_kategoribarang_di_kota[i][1].reset_index().sort_values(by = ('count'), ascending = False)
-        pembelian_kategoribarang_di_kota[i][1] = pembelian_kategoribarang_di_kota[i][1].head(input_barang)
-        sns.barplot(y=pembelian_kategoribarang_di_kota[i][1]['product_category_name_<lambda>'],
-                                                            x=pembelian_kategoribarang_di_kota[i][1]['count'],
-                                                            data=pembelian_kategoribarang_di_kota[i][1],
-                                                            palette=colors,
-                                                            ax=ax[i]
-                                                            )
+    pembelian_kategoribarang_di_kota[i][1] = pembelian_kategoribarang_di_kota[i][1].reset_index().sort_values(by = ('count'), ascending = False)
+    pembelian_kategoribarang_di_kota[i][1] = pembelian_kategoribarang_di_kota[i][1].head(input_barang)
+    
+    pembelian_kategoribarang_di_kota[i][1]['product_category_name_<lambda>'] = [i[:12]+'...' for i in pembelian_kategoribarang_di_kota[i][1]['product_category_name_<lambda>']]
+        
+    sns.barplot(y=pembelian_kategoribarang_di_kota[i][1]['product_category_name_<lambda>'],
+                x=pembelian_kategoribarang_di_kota[i][1]['count'],
+                data=pembelian_kategoribarang_di_kota[i][1],
+                palette=colors,
+                ax=ax[i][1]
+                )
                                       
-        ax[i].set_xlabel("Total Pembelian Barang (Satuan)", fontsize=24)
-        ax[i].set_ylabel("Kategori Barang", fontsize=24)
-        ax[i].set_title("Top 10 Pembelian Kategori Barang di"+ " " + pembelian_kategoribarang_di_kota[i][0], fontsize=28)
-        ax[i].tick_params(axis='y', labelsize=20)
-        ax[i].tick_params(axis='x', labelsize=20)
+    ax[i][1].set_xlabel("Total Pembelian Barang (Satuan)", fontsize=24)
+    ax[i][1].set_ylabel("Kategori Barang", fontsize=24)
+    ax[i][1].set_title("Top 10 Pembelian Kategori Barang di"+ " " + pembelian_kategoribarang_di_kota[i][0], fontsize=28)
+    ax[i][1].tick_params(axis='y', labelsize=20)
+    ax[i][1].tick_params(axis='x', labelsize=20)
 
-    plt.tight_layout()                                                                                                                                 
-    st.pyplot(fig)
+plt.tight_layout()                                                                                                                                 
+st.pyplot(fig)
 
 ## Klaster Customer
 
-fig, ax = plt.subplots(nrows=2, ncols=1, figsize=(12,20))
+st.write(
+    """
+    Berikutnya pembuatan klaster secara manual untuk customer berdasarkan  pengeluaran yang dilakukan.
+    Klasterisasi ini dibuat sedemikian sehingga semakin tinggi tingkatan klaster maka semakin sedikit anggotanya.
+    Berikut besaran dari masing-masing klaster:
+
+    * Penghasilan Seller Klaster I < 300 BRL (Brazilian Real)
+
+    * 300 BRL <= Penghasilan Seller Klaster II < 1000 BRL 
+
+    * 1000 BRL <= Penghasilan Seller Klaster III < 2500 BRL 
+
+    * 2500 BRL <= Penghasilan Seller Klaster IV < 5000 BRL 
+
+    * 5000 BRL <= Penghasilan Seller Klaster V < 10000 BRL 
+
+    * 10000 BRL <= Penghasilan Seller Klaster VI < 50000 BRL 
+
+    * 50000 BRL <= Penghasilan Seller Klaster VII.
+    """
+)
+
+fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(12,20))
 
 colors = ('#C46100', '#EF9234', '#F4B678', '#F9E0A2', '#F4B678', '#EF9234')
 explode = (0.02, 0.03, 0.05, 0.07, 0.09, 0.11)
@@ -636,7 +686,7 @@ count = (df_customer_klaster['customer_id_count'][0],
          df_customer_klaster['customer_id_count'][5]+df_customer_klaster['customer_id_count'][6]
          )
 
-ax[0].pie(
+ax.pie(
     x=count,
     labels=klaster,
     autopct='%1.1f%%',
@@ -644,9 +694,35 @@ ax[0].pie(
     explode=explode,
     wedgeprops = {'width': 0.5}
     )
-ax[0].set_title('Klaster Customer', fontsize=26)
+ax.set_title('Klaster Customer', fontsize=26)
+
+st.pyplot(fig)
 
 ## Klaster Seller
+
+st.write(
+    """
+    Sedangkan pembuatan klaster  untuk seller dibuat berdasarkan  penghasilan yang dilakukan.
+    Klasterisasi ini dibuat sedemikian sehingga semakin tinggi tingkatan klaster maka semakin sedikit anggotanya.
+    Berikut besaran dari masing-masing klaster:
+
+    * Pengeluaran Customer Klaster I < 70 BRL (Brazilian Real)
+
+    * 70 BRL <= Pengeluaran Customer Klaster II < 130 BRL 
+
+    * 130 BRL <= Pengeluaran Customer Klaster III < 210 BRL 
+
+    * 210 BRL <= Pengeluaran Customer Klaster IV < 350 BRL 
+
+    * 350 BRL <= Pengeluaran Customer Klaster V < 1000 BRL 
+
+    * 1000 BRL <= Pengeluaran Customer Klaster VI < 4000 BRL 
+
+    * 4000 BRL <= Pengeluaran Customer Klaster VII.
+    """
+)
+
+fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(12,20))
 
 klaster = kumpulan_klaster
 count = (df_sellers_klaster['seller_id_count'][0],
@@ -659,7 +735,7 @@ count = (df_sellers_klaster['seller_id_count'][0],
          )
 colors = ('#8F4700', '#C46100', '#EF9234', '#F4B678', '#F9E0A2', '#F4B678', '#C46100')
 explode = (0.02, 0.03, 0.05, 0.07, 0.09, 0.11, 0.13)
-ax[1].pie(
+ax.pie(
     x=count,
     labels=klaster,
     autopct='%1.1f%%',
@@ -667,6 +743,6 @@ ax[1].pie(
     explode=explode,
     wedgeprops = {'width': 0.5}
     )
-ax[1].set_title("Klaster Seller", fontsize=26)
+ax.set_title("Klaster Seller", fontsize=26)
 
 st.pyplot(fig)

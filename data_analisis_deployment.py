@@ -227,6 +227,8 @@ def return_kategori_di_kota_beli(df_customer_city_merged: pd.DataFrame) -> list:
     return pemberlian_kategoribarang_di_kota
 
 ### Membuat Klaster customer
+kumpulan_klaster = ['Klaster I','Klaster II','Klaster III','Klaster IV','Klaster V','Klaster VI','Klaster VII']
+
 def create_klaster_customer(df_customer_merged: pd.DataFrame) -> pd.DataFrame:
 
     """
@@ -255,13 +257,18 @@ def create_klaster_customer(df_customer_merged: pd.DataFrame) -> pd.DataFrame:
                        batas_atas_klaster_VI,
                        float('inf')
                        ]
-    kumpulan_klaster = ['Klaster I','Klaster II','Klaster III','Klaster IV','Klaster V','Klaster VI','Klaster VII']
 
     df_customer_merged['Klaster'] = pd.cut(df_customer_merged['payment_value_sum'],
                                            bins=batasan_klaster,
                                            labels=kumpulan_klaster,
                                            include_lowest=True)
     df_customer_klaster = df_customer_merged[['customer_id','payment_value_sum','Klaster']]
+
+    df_customer_klaster = df_customer_klaster.groupby(by='Klaster').agg({'Klaster': 'count'
+                                                                        ,'customer_id': lambda x: list(x)
+                                                                        ,'payment_value_sum': lambda x: list(x)})
+
+    df_customer_klaster.columns = ['customer_id_count','customer_id','payment_value_sum']
 
     return df_customer_klaster
 
@@ -294,8 +301,6 @@ def create_klaster_sellers(df_sellers_merged: pd.DataFrame) -> pd.DataFrame:
                        batas_atas_klaster_VI,
                        float('inf')
                        ]
-    
-    kumpulan_klaster = ['Klaster I','Klaster II','Klaster III','Klaster IV','Klaster V','Klaster VI','Klaster VII']
 
     df_sellers_merged['Klaster'] = pd.cut(df_sellers_merged['price_sum'],
                                           bins=batasan_klaster,
@@ -303,6 +308,12 @@ def create_klaster_sellers(df_sellers_merged: pd.DataFrame) -> pd.DataFrame:
                                           include_lowest=True)
     
     df_sellers_klaster = df_sellers_merged[['seller_id','price_sum','Klaster']]
+
+    df_sellers_klaster = df_sellers_klaster.groupby(by='Klaster').agg({'Klaster': 'count'
+                                                                    ,'seller_id': lambda x: list(x)
+                                                                    ,'price_sum': lambda x: list(x)})
+
+    df_sellers_klaster.columns = ['seller_id_count','seller_id','price_sum']
 
     return df_sellers_klaster
 
@@ -348,6 +359,10 @@ penjualan_kategoribarang_di_kota = return_kategori_di_kota_jual(df_sellers_city_
 df_customer_city_merged = create_df_customer_city_merged(df_customer_merged)
 
 pembelian_kategoribarang_di_kota = return_kategori_di_kota_jual(df_customer_city_merged)
+
+df_customer_klaster = create_klaster_customer(df_customer_merged)
+
+df_sellers_klaster = create_klaster_sellers(df_sellers_merged)
 
 ## DEPLOYMENT
 st.title('Proyek Data Analisis :sparkles:')
@@ -546,31 +561,112 @@ else:
 
 ### Pertanyaan 4
 col1, col2 = st.columns(2)
-st.subheader('a')
+
+input_kota = 3 # 1-8
+input_barang = 4 # 1-10
+
 with col1:
 
-    st.subheader('a')
+    fig, ax = plt.subplots(nrows=input_kota, ncols=1, figsize=(12,20))    
 
-    fig, ax = plt.subplots(nrows=3, ncols=1, figsize=(12,20))    
+    colors = ["#90CAF9", "#D3D3D3", "#D3D3D3", "#D3D3D3", "#D3D3D3",
+              "#D3D3D3", "#D3D3D3", "#D3D3D3", "#D3D3D3", "#D3D3D3"]
 
-    colors = ["#90CAF9", "#D3D3D3", "#D3D3D3", "#D3D3D3", "#D3D3D3"]
+    for i in range (input_kota):
+        
+        penjualan_kategoribarang_di_kota[i][1] = penjualan_kategoribarang_di_kota[i][1].reset_index().sort_values(by = ('count'), ascending = False)
+        penjualan_kategoribarang_di_kota[i][1] = penjualan_kategoribarang_di_kota[i][1].head(input_barang)
+        sns.barplot(y=penjualan_kategoribarang_di_kota[i][1]['product_category_name_<lambda>'],
+                                                            x=penjualan_kategoribarang_di_kota[i][1]['count'],
+                                                            data=penjualan_kategoribarang_di_kota[i][1],
+                                                            palette=colors,
+                                                            ax=ax[i]
+                                                            )
+                                      
+        ax[i].set_xlabel("Total Penjualan Barang (Satuan)", fontsize=24)
+        ax[i].set_ylabel("Kategori Barang", fontsize=24)
+        ax[i].set_title("Top 10 Penjualan Kategori Barang di"+ " " + penjualan_kategoribarang_di_kota[i][0], fontsize=28)
+        ax[i].tick_params(axis='y', labelsize=20)
+        ax[i].tick_params(axis='x', labelsize=20)
 
-    penjualan_kategoribarang_di_kota[0][1] = penjualan_kategoribarang_di_kota[0][1].reset_index().sort_values(by = ('count'), ascending = True)
-    sns.barplot(y=penjualan_kategoribarang_di_kota[0][1]['product_category_name_<lambda>'],
-                                                        x=penjualan_kategoribarang_di_kota[0][1]['count'],
-                                                        data=penjualan_kategoribarang_di_kota[0][1],
-                                                        palette=colors,
-                                                        ax=ax[0]
-                                                        )
+    plt.tight_layout()                                                                                                                                 
+    st.pyplot(fig)
 
-    ax[0].set_xlabel("Total Penjualan Barang (Satuan)", fontsize=24)
-    ax[0].set_ylabel("Kategori Barang", fontsize=24)
-    ax[0].set_title("Top 10 Penjualan Kategori Barang di", fontsize=28)
-    ax[0].tick_params(axis='y', labelsize=20)
-    ax[0].tick_params(axis='x', labelsize=20)
+with col2:
 
-    st.subheader('DEVITA I LOVE YOUUU')
+    fig, ax = plt.subplots(nrows=input_kota, ncols=1, figsize=(12,20))
 
-    st.pyplot(plt)
+    colors = ["#90CAF9", "#D3D3D3", "#D3D3D3", "#D3D3D3", "#D3D3D3",
+              "#D3D3D3", "#D3D3D3", "#D3D3D3", "#D3D3D3", "#D3D3D3"]
 
+    for i in range (input_kota):
+        
+        pembelian_kategoribarang_di_kota[i][1] = pembelian_kategoribarang_di_kota[i][1].reset_index().sort_values(by = ('count'), ascending = False)
+        pembelian_kategoribarang_di_kota[i][1] = pembelian_kategoribarang_di_kota[i][1].head(input_barang)
+        sns.barplot(y=pembelian_kategoribarang_di_kota[i][1]['product_category_name_<lambda>'],
+                                                            x=pembelian_kategoribarang_di_kota[i][1]['count'],
+                                                            data=pembelian_kategoribarang_di_kota[i][1],
+                                                            palette=colors,
+                                                            ax=ax[i]
+                                                            )
+                                      
+        ax[i].set_xlabel("Total Pembelian Barang (Satuan)", fontsize=24)
+        ax[i].set_ylabel("Kategori Barang", fontsize=24)
+        ax[i].set_title("Top 10 Pembelian Kategori Barang di"+ " " + pembelian_kategoribarang_di_kota[i][0], fontsize=28)
+        ax[i].tick_params(axis='y', labelsize=20)
+        ax[i].tick_params(axis='x', labelsize=20)
 
+    plt.tight_layout()                                                                                                                                 
+    st.pyplot(fig)
+
+## Klaster Customer
+
+fig, ax = plt.subplots(nrows=2, ncols=1, figsize=(12,20))
+
+colors = ('#C46100', '#EF9234', '#F4B678', '#F9E0A2', '#F4B678', '#EF9234')
+explode = (0.02, 0.03, 0.05, 0.07, 0.09, 0.11)
+
+klaster = kumpulan_klaster[:5]
+klaster.append("Klaster VI dan VII")
+count = (df_customer_klaster['customer_id_count'][0],
+         df_customer_klaster['customer_id_count'][1],
+         df_customer_klaster['customer_id_count'][2],
+         df_customer_klaster['customer_id_count'][3],
+         df_customer_klaster['customer_id_count'][4],
+         df_customer_klaster['customer_id_count'][5]+df_customer_klaster['customer_id_count'][6]
+         )
+
+ax[0].pie(
+    x=count,
+    labels=klaster,
+    autopct='%1.1f%%',
+    colors=colors,
+    explode=explode,
+    wedgeprops = {'width': 0.5}
+    )
+ax[0].set_title('Klaster Customer', fontsize=26)
+
+## Klaster Seller
+
+klaster = kumpulan_klaster
+count = (df_sellers_klaster['seller_id_count'][0],
+         df_sellers_klaster['seller_id_count'][1],
+         df_sellers_klaster['seller_id_count'][2],
+         df_sellers_klaster['seller_id_count'][3],
+         df_sellers_klaster['seller_id_count'][4],
+         df_sellers_klaster['seller_id_count'][5],
+         df_sellers_klaster['seller_id_count'][6]
+         )
+colors = ('#8F4700', '#C46100', '#EF9234', '#F4B678', '#F9E0A2', '#F4B678', '#C46100')
+explode = (0.02, 0.03, 0.05, 0.07, 0.09, 0.11, 0.13)
+ax[1].pie(
+    x=count,
+    labels=klaster,
+    autopct='%1.1f%%',
+    colors=colors,
+    explode=explode,
+    wedgeprops = {'width': 0.5}
+    )
+ax[1].set_title("Klaster Seller", fontsize=26)
+
+st.pyplot(fig)
